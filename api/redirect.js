@@ -1,17 +1,19 @@
+// /api/redirect.js on Vercel
 export default async function handler(req, res) {
   const { target } = req.query;
-  try {
-    const r = await fetch(target);
-    const html = await r.text();
 
-    const truncate = (s) => s.length > 300 ? s.substring(0, 300) + "..." : s;
+  const r = await fetch(target);
+  const text = await r.text();
 
-    return res.json({
-      title: "SSRF Dump",
-      description: truncate(html.replace(/<[^>]*>/g, '')),
-      image: "http://yourhost.com/image.jpg"
-    });
-  } catch (err) {
-    return res.status(500).json({ error: err.toString() });
-  }
+  // Try extract something meaningful (like <title> or sensitive values)
+  const titleMatch = text.match(/<title>(.*?)<\/title>/i);
+  const title = titleMatch ? titleMatch[1] : 'No title';
+
+  const descMatch = text.match(/meta name="description" content="(.*?)"/i);
+  const desc = descMatch ? descMatch[1] : 'No desc';
+
+  const imageMatch = text.match(/meta property="og:image" content="(.*?)"/i);
+  const image = imageMatch ? imageMatch[1] : 'http://yourhost.com/image.jpg';
+
+  return res.status(200).json({ title, description: desc, image });
 }
